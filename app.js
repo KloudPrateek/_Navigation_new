@@ -19,7 +19,7 @@ io.on("connection", (socket) => {
         console.log("Received Coordinates:", data.latitude, data.longitude);
 
         // Send coordinates to the Spring Boot server
-        axios.post(`http://10.90.5.29:8080/api/map-matching`, {
+        axios.post(`http://192.168.51.169:8080/api/map-matching`, {
             latitude: data.latitude,
             longitude: data.longitude
         })
