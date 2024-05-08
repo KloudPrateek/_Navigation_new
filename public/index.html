@@ -14,7 +14,12 @@
                     navigator.geolocation.watchPosition(position => {
                         console.log(position.coords.latitude);
                         console.log(position.coords.longitude);
-                        document.getElementById("map").innerHTML = `<p>Latitude: ${position.coords.latitude.toFixed(8)}</p><p>Longitude: ${position.coords.longitude.toFixed(8)}</p>`;
+                        const coordinateString = `${position.coords.toFixed(8)},${position.coords.toFixed(8)}`;
+                        if (!coordinates.has(coordinateString)) {
+                            coordinates.add(coordinateString);
+                            const coordinateHTML = `<p>Latitude: ${latitude.toFixed(8)}</p><p>Longitude: ${longitude.toFixed(8)}</p>`;
+                            document.getElementById("map").innerHTML += coordinateHTML;
+                        }
                     });
                 }
                 else{
