@@ -1,37 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    <div id = "map"></div>
+  </head>
+  <body>
+    <div id="map"></div>
     <script>
-        let coordinates = new Set();
+      let coordinates = new Set();
 
-        function updateCoordinates(){
-                if('geolocation' in navigator){
-                    console.log("Location Available");
-                    navigator.geolocation.watchPosition(position => {
-                        console.log(position.coords.latitude);
-                        console.log(position.coords.longitude);
-                        const coordinateString = `${position.coords.latitude.toFixed(8)},${position.coords.longitude.toFixed(8)}`;
-                        if (!coordinates.has(coordinateString)) {
-                            coordinates.add(coordinateString);
-                            const coordinateHTML = `<p>Latitude: ${position.coords.latitude.toFixed(8)}</p><p>Longitude: ${position.coords.longitude.toFixed(8)}</p>`;
-                            document.getElementById("map").innerHTML += coordinateHTML;
-                        }
-                    });
-                }
-                else{
-                    console.log("Location Not Available");
-                }
+      function updateCoordinates() {
+        if ("geolocation" in navigator) {
+          console.log("Location Available");
+          navigator.geolocation.watchPosition((position) => {
+            console.log(position.coords.latitude);
+            console.log(position.coords.longitude);
+            const coordinateString = `${position.coords.latitude.toFixed(
+              8
+            )},${position.coords.longitude.toFixed(8)}`;
+            if (!coordinates.has(coordinateString)) {
+              fetch("/data", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ longitude: `${position.coords.longitude}` , latitude: `${position.coords.latitude}`}),
+              })
+                .then((response) => response.json())
+                .then((data) => console.log(data))
+                .catch((error) => console.error("Error:", error));
+
+              coordinates.add(coordinateString);
+              const coordinateHTML = `<p>Latitude: ${position.coords.latitude.toFixed(
+                8
+              )}</p><p>Longitude: ${position.coords.longitude.toFixed(8)}</p>`;
+              document.getElementById("map").innerHTML += coordinateHTML;
+            }
+          });
+        } else {
+          console.log("Location Not Available");
         }
-        
-        updateCoordinates();
+      }
 
-        setInterval(updateCoordinates, 2000);
+      updateCoordinates();
+
+      setInterval(updateCoordinates, 2000);
     </script>
-</body>
+  </body>
 </html>
