@@ -1,51 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-  </head>
-  <body>
+</head>
+<body>
     <div id="map"></div>
+    <!-- Include Socket.IO client library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <script>
-      let coordinates = new Set();
+        let coordinates = new Set();
 
-      function updateCoordinates() {
-        if ("geolocation" in navigator) {
-          console.log("Location Available");
-          navigator.geolocation.watchPosition((position) => {
-            console.log(position.coords.latitude);
-            console.log(position.coords.longitude);
-            const coordinateString = `${position.coords.latitude.toFixed(
-              8
-            )},${position.coords.longitude.toFixed(8)}`;
-            if (!coordinates.has(coordinateString)) {
-              fetch("/data", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ longitude: `${position.coords.longitude}` , latitude: `${position.coords.latitude}`}),
-              })
-                .then((response) => response.json())
-                .then((data) => console.log(data))
-                .catch((error) => console.error("Error:", error));
+        function updateCoordinates() {
+            if ('geolocation' in navigator) {
+                console.log("Location Available");
+                navigator.geolocation.watchPosition(position => {
+                    console.log(position.coords.latitude);
+                    console.log(position.coords.longitude);
+                    const coordinateString = `${position.coords.latitude.toFixed(8)},${position.coords.longitude.toFixed(8)}`;
+                    if (!coordinates.has(coordinateString)) {
+                        coordinates.add(coordinateString);
+                        const coordinateHTML = `<p>Latitude: ${position.coords.latitude.toFixed(8)}</p><p>Longitude: ${position.coords.longitude.toFixed(8)}</p>`;
+                        document.getElementById("map").innerHTML += coordinateHTML;
 
-              coordinates.add(coordinateString);
-              const coordinateHTML = `<p>Latitude: ${position.coords.latitude.toFixed(
-                8
-              )}</p><p>Longitude: ${position.coords.longitude.toFixed(8)}</p>`;
-              document.getElementById("map").innerHTML += coordinateHTML;
+                        // Establish Socket.IO connection
+                        const socket = io("http://localhost:3000"); // Specify the Socket.IO server URL
+
+                        // Send coordinates to the server via Socket.IO
+                        socket.emit('coordinates', { latitude: position.coords.latitude, longitude: position.coords.longitude });
+                    }
+                });
+            } else {
+                console.log("Location Not Available");
             }
-          });
-        } else {
-          console.log("Location Not Available");
         }
-      }
 
-      updateCoordinates();
+        // Call updateCoordinates function
+        updateCoordinates();
 
-      setInterval(updateCoordinates, 2000);
+        setInterval(updateCoordinates, 2000);
     </script>
-  </body>
+</body>
 </html>
